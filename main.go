@@ -7,10 +7,11 @@ import (
 )
 
 func main() {
+	core := summer.NewCore()
+	registerRouter(core)
 	server := &http.Server{
-		Addr:    ":8080",
-		Handler: summer.NewCore(),
+		Handler: core,
+		Addr:    "localhost:8888",
 	}
-
 	server.ListenAndServe()
 }
