@@ -14,10 +14,10 @@ import (
 )
 
 type Context struct {
-	request  *http.Request
-	response http.ResponseWriter
-	ctx      context.Context
-	handler  ControllerHandler
+	request     *http.Request
+	response    http.ResponseWriter
+	ctx         context.Context
+	handlerPipe *handlerPipeline
 
 	// 请求链路是否已超时
 	hasTimeout bool
@@ -27,16 +27,25 @@ type Context struct {
 
 func NewContext(r *http.Request, w http.ResponseWriter) *Context {
 	return &Context{
-		request:   r,
-		response:  w,
-		ctx:       r.Context(),
-		writerMux: &sync.Mutex{},
+		request:     r,
+		response:    w,
+		ctx:         r.Context(),
+		handlerPipe: newHandlerPipeline(),
+		writerMux:   &sync.Mutex{},
 	}
 }
 
 func (c *Context) BaseContext() context.Context {
 	return c.request.Context()
 }
+
+// # region implement handler pipeline
+
+func (c *Context) Next() error {
+	return c.handlerPipe.next(c)
+}
+
+// # end-region implement handler pipeline
 
 // # region base func
 
@@ -82,7 +91,7 @@ func (c *Context) Value(key interface{}) interface{} {
 
 // # end-region implement interface context.Context
 
-// # region query params
+// # region implement request
 
 func (c *Context) QueryParams() map[string][]string {
 	if c.request != nil {
@@ -149,7 +158,7 @@ func (c *Context) QueryStrSlc(key string, def []string) []string {
 	return paramValues
 }
 
-// # end-region query params
+// # end-region implement request
 
 // # region form post
 

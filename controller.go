@@ -1,47 +1,44 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"log"
+	"net/http"
 	"time"
 
 	"go-web-framework/summer"
 )
 
-func FooControllerHandler(c *summer.Context) error {
-	finish := make(chan struct{}, 1)
-	panicChan := make(chan interface{}, 1)
+func UserLoginController(c *summer.Context) error {
+	fmt.Println("recv a new req, start executing work...")
+	time.Sleep(3 * time.Second)
+	fmt.Println("finished executing work...")
+	c.Json(http.StatusOK, "login success")
+	return nil
+}
 
-	durationCtx, cancel := context.WithTimeout(c.BaseContext(), time.Duration(2*time.Second))
-	defer cancel()
+type SubjectController struct{}
 
-	// mu := sync.Mutex{}
-	go func() {
-		defer func() {
-			if p := recover(); p != nil {
-				panicChan <- p
-			}
-		}()
-		// Do real action
-		time.Sleep(1 * time.Second)
-		c.Json(200, "ok")
+func (s SubjectController) List(c *summer.Context) error {
+	return nil
+}
 
-		finish <- struct{}{}
-	}()
-	select {
-	case p := <-panicChan:
-		c.WriterMux().Lock()
-		defer c.WriterMux().Unlock()
-		log.Println(p)
-		c.Json(500, "panic")
-	case <-finish:
-		fmt.Println("finish")
-	case <-durationCtx.Done():
-		c.WriterMux().Lock()
-		defer c.WriterMux().Unlock()
-		c.Json(500, "time out")
-		c.SetHasTimeout()
-	}
+func (s SubjectController) GetName(c *summer.Context) error {
+	return nil
+}
+
+func (s SubjectController) Get(c *summer.Context) error {
+	c.Json(http.StatusOK, fmt.Sprintf("this is %s", c.GetRequest().URL.Path))
+	return nil
+}
+
+func (s SubjectController) Delete(c *summer.Context) error {
+	return nil
+}
+
+func (s SubjectController) Add(c *summer.Context) error {
+	return nil
+}
+
+func (s SubjectController) Update(c *summer.Context) error {
 	return nil
 }
