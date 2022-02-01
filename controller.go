@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -9,9 +10,9 @@ import (
 )
 
 func UserLoginController(c *summer.Context) error {
-	fmt.Println("recv a new req, start executing work...")
+	log.Printf("recv a new req, start executing work at time: %s", time.Now().String())
 	time.Sleep(3 * time.Second)
-	fmt.Println("finished executing work...")
+	log.Printf("finished executing work at time: %s", time.Now().String())
 	c.Json(http.StatusOK, "login success")
 	return nil
 }

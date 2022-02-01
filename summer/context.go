@@ -45,12 +45,20 @@ func (c *Context) Next() error {
 	return c.handlerPipe.next(c)
 }
 
+func (c *Context) SetHandlers(handlers []ControllerHandler) {
+	c.handlerPipe.add(handlers)
+}
+
 // # end-region implement handler pipeline
 
 // # region base func
 
 func (c *Context) WriterMux() *sync.Mutex {
 	return c.writerMux
+}
+
+func (c *Context) RequestString() string {
+	return fmt.Sprintf("request:{method: %s, url-path: %s}", c.request.Method, c.request.URL.Path)
 }
 
 func (c *Context) GetRequest() *http.Request {
@@ -247,6 +255,9 @@ func (c *Context) UnmarshalReqForm(v interface{}) error {
 // # region response
 
 func (c *Context) Json(status int, data interface{}) error {
+	c.WriterMux().Lock()
+	defer c.WriterMux().Unlock()
+
 	if c.HasTimeout() {
 		return nil
 	}

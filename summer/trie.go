@@ -18,12 +18,11 @@ func NewTrie() *Trie {
 }
 
 type node struct {
-	isLeafNode bool                // 叶节点标志，如果是叶节点则说明该节点是一个uri
-	parentPath string              // 该节点的所有父节点路径段，例如：'/user/:id', segment='name'
-	segment    string              // uri中的路径段，例如：'user'属于'/user/:id/name'中的一个segment
-	handlers   []ControllerHandler // 控制器链(中间件、业务逻辑控制器)
-	handler    ControllerHandler   // 控制器，只有该节点是叶节点时才存在
-	children   []*node             // 子节点
+	isLeafNode  bool             // 叶节点标志，如果是叶节点则说明该节点是一个uri
+	parentPath  string           // 该节点的所有父节点路径段，例如：'/user/:id', segment='name'
+	segment     string           // uri中的路径段，例如：'user'属于'/user/:id/name'中的一个segment
+	handlerPipe *handlerPipeline // 控制器链(中间件、业务逻辑控制器)
+	children    []*node          // 子节点
 }
 
 func newNode() *node {
@@ -89,7 +88,7 @@ func (n *node) matchNode(uri string) *node {
 	return nil
 }
 
-func (t *Trie) AddRouter(uri string, handler ControllerHandler) error {
+func (t *Trie) AddRouter(uri string, handlers []ControllerHandler) error {
 	parent := t.root
 	n := parent.matchNode(uri)
 	if n != nil {
@@ -117,7 +116,7 @@ func (t *Trie) AddRouter(uri string, handler ControllerHandler) error {
 			childNode = &node{segment: segment, parentPath: path.Join(parent.parentPath, parent.segment)}
 			if index == len(segments)-1 {
 				childNode.isLeafNode = true
-				childNode.handler = handler
+				childNode.handlerPipe = &handlerPipeline{handlers: handlers}
 			}
 			parent.children = append(parent.children, childNode)
 		}
@@ -126,7 +125,7 @@ func (t *Trie) AddRouter(uri string, handler ControllerHandler) error {
 	return nil
 }
 
-func (t *Trie) FindHandler(uri string) ControllerHandler {
+func (t *Trie) FindHandler(uri string) *handlerPipeline {
 	log.Printf("start finding handler for uri '%s'", uri)
 	n := t.root.matchNode(uri)
 	if n == nil {
@@ -134,5 +133,5 @@ func (t *Trie) FindHandler(uri string) ControllerHandler {
 		return nil
 	}
 	log.Printf("matched handler for uri '%s'", uri)
-	return n.handler
+	return n.handlerPipe
 }
