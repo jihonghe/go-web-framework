@@ -15,7 +15,6 @@ func Timeout(d time.Duration) summer.ControllerHandler {
 		panicChan := make(chan interface{}, 1)
 
 		durationCtx, cancel := context.WithTimeout(c.BaseContext(), d)
-		defer cancel()
 
 		go func() {
 			defer func() {
@@ -30,14 +29,14 @@ func Timeout(d time.Duration) summer.ControllerHandler {
 
 		select {
 		case p := <-panicChan:
-			c.Json(http.StatusInternalServerError, "inner error")
+			c.SetStatus(http.StatusInternalServerError).Json("inner error")
 			log.Printf("failed to exec handler, error: %v", p)
 		case <-finish:
 			log.Printf("finished task in duration: %s", d)
 		case <-durationCtx.Done():
-			c.Json(http.StatusInternalServerError, "time out")
+			c.SetStatus(http.StatusInternalServerError).Json("timeout")
 			c.SetHasTimeout()
-			log.Printf("response for %s has already timeout", c.RequestString())
+			cancel()
 		}
 		return nil
 	}

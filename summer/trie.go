@@ -22,11 +22,8 @@ type node struct {
 	parentPath  string           // 该节点的所有父节点路径段，例如：'/user/:id', segment='name'
 	segment     string           // uri中的路径段，例如：'user'属于'/user/:id/name'中的一个segment
 	handlerPipe *handlerPipeline // 控制器链(中间件、业务逻辑控制器)
+	parent      *node            // 父节点，实现双向指针
 	children    []*node          // 子节点
-}
-
-func newNode() *node {
-	return &node{children: []*node{}}
 }
 
 // isWildSegment 用于判断该路径段是否为通配符路径段
@@ -88,6 +85,27 @@ func (n *node) matchNode(uri string) *node {
 	return nil
 }
 
+func (n *node) parseParams(uri string) map[string]string {
+	if !n.isLeafNode {
+		return map[string]string{}
+	}
+	params := map[string]string{}
+
+	cur := n
+	segments := strings.Split(uri, "/")
+	for i := len(segments) - 1; i >= 0; i++ {
+		// 判断是否到了trie的root节点
+		if cur.segment == "" {
+			break
+		}
+		if isWildSegment(cur.segment) {
+			params[cur.segment[1:]] = segments[i]
+		}
+		cur = cur.parent
+	}
+	return params
+}
+
 func (t *Trie) AddRouter(uri string, handlers []ControllerHandler) error {
 	parent := t.root
 	n := parent.matchNode(uri)
@@ -112,8 +130,10 @@ func (t *Trie) AddRouter(uri string, handlers []ControllerHandler) error {
 				}
 			}
 		}
+		// 不存在则创建新节点
 		if childNode == nil {
-			childNode = &node{segment: segment, parentPath: path.Join(parent.parentPath, parent.segment)}
+			// 设置节点对应的路径段、父节点、父节点对应的路径段等
+			childNode = &node{segment: segment, parent: parent, parentPath: path.Join(parent.parentPath, parent.segment)}
 			if index == len(segments)-1 {
 				childNode.isLeafNode = true
 				childNode.handlerPipe = &handlerPipeline{handlers: handlers}

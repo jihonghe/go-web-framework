@@ -8,7 +8,7 @@ import (
 func registerRouter(core *summer.Core) {
 	// 静态路由
 	// core.Get("/user/login", middleware.TestMiddleware(), UserLoginController)
-	// core.Get("/user/login", middleware.Timeout(1*time.Second), middleware.Cost, UserLoginController)
+	// core.Get("/user/login", middleware.Timeout(500*time.Millisecond), middleware.Cost, UserLoginController)
 	core.Get("/user/login", middleware.Cost, UserLoginController)
 	// 路由组
 	group := core.Group("/subject")

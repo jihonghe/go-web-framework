@@ -99,21 +99,28 @@ func (c *Core) GetReqHandlers(r *http.Request) []ControllerHandler {
 	return nil
 }
 
+func (c *Core) FindRouteNode(r *http.Request) *node {
+	if methodHandlers, ok := c.router[strings.ToUpper(r.Method)]; ok {
+		return methodHandlers.root.matchNode(r.URL.Path)
+	}
+	return nil
+}
+
 func (c *Core) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	log.Println("start executing summer.Core.ServeHTTP")
 	ctx := NewContext(r, w)
 
-	reqHandlers := c.GetReqHandlers(r)
-	if reqHandlers == nil {
-		ctx.Json(http.StatusNotFound, fmt.Sprintf("route '[%s] %s' not found", r.Method, r.URL.Path))
+	routeNode := c.FindRouteNode(r)
+	if routeNode == nil {
+		ctx.SetStatus(http.StatusNotFound).Json(fmt.Sprintf("route '[%s] %s' not found", r.Method, r.URL.Path))
 		return
 	}
-
-	ctx.SetHandlers(reqHandlers)
+	ctx.SetHandlers(routeNode.handlerPipe.handlers)
+	ctx.SetParams(routeNode.parseParams(r.URL.Path))
 
 	if err := ctx.Next(); err != nil {
 		log.Printf("failed to exec handler pipeline for req %s, error: %s", ctx.RequestString(), err.Error())
-		ctx.Json(http.StatusInternalServerError, "inner error")
+		ctx.SetStatus(http.StatusInternalServerError).Json("inner error")
 	}
 }
 
