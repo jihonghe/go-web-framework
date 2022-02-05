@@ -5,40 +5,33 @@ import (
 	"log"
 	"time"
 
-	"go-web-framework/summer"
+	"github.com/jihonghe/go-web-framework/summer/gin"
 )
 
-func UserLoginController(c *summer.Context) error {
+func UserLoginController(c *gin.Context) {
 	log.Printf("recv a new req, start executing work at time: %s", time.Now().String())
-	time.Sleep(10 * time.Second)
+	time.Sleep(1 * time.Second)
 	log.Printf("finished executing work at time: %s", time.Now().String())
-	c.SetStatusOk().Json("login success")
-	return nil
+	c.ISetStatusOk().IJson("login success")
 }
 
 type SubjectController struct{}
 
-func (s SubjectController) List(c *summer.Context) error {
-	return nil
+func (s SubjectController) List(c *gin.Context) {
 }
 
-func (s SubjectController) GetName(c *summer.Context) error {
-	return nil
+func (s SubjectController) GetName(c *gin.Context) {
 }
 
-func (s SubjectController) Get(c *summer.Context) error {
-	c.SetStatusOk().Json(fmt.Sprintf("this is %s", c.GetRequest().URL.Path))
-	return nil
+func (s SubjectController) Get(c *gin.Context) {
+	c.ISetStatusOk().IJson(fmt.Sprintf("this is %s", c.Request.URL.Path))
 }
 
-func (s SubjectController) Delete(c *summer.Context) error {
-	return nil
+func (s SubjectController) Delete(c *gin.Context) {
 }
 
-func (s SubjectController) Add(c *summer.Context) error {
-	return nil
+func (s SubjectController) Add(c *gin.Context) {
 }
 
-func (s SubjectController) Update(c *summer.Context) error {
-	return nil
+func (s SubjectController) Update(c *gin.Context) {
 }

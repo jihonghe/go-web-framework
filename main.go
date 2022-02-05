@@ -8,14 +8,14 @@ import (
 	"os/signal"
 	"syscall"
 
-	"go-web-framework/summer"
+	"github.com/jihonghe/go-web-framework/summer/gin"
 )
 
 func main() {
-	core := summer.NewCore()
-	registerRouter(core)
+	engine := gin.New()
+	registerRouter(engine)
 	server := &http.Server{
-		Handler: core,
+		Handler: engine,
 		Addr:    "localhost:8888",
 	}
 	go func() {

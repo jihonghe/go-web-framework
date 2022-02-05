@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"time"
 
-	"go-web-framework/summer"
+	"github.com/jihonghe/go-web-framework/summer/gin"
 )
 
-func Timeout(d time.Duration) summer.ControllerHandler {
-	return func(c *summer.Context) error {
+func Timeout(d time.Duration) gin.HandlerFunc {
+	return func(c *gin.Context) {
 		finish := make(chan struct{}, 1)
 		panicChan := make(chan interface{}, 1)
 
@@ -29,15 +29,13 @@ func Timeout(d time.Duration) summer.ControllerHandler {
 
 		select {
 		case p := <-panicChan:
-			c.SetStatus(http.StatusInternalServerError).Json("inner error")
+			c.ISetStatus(http.StatusInternalServerError).IJson("inner error")
 			log.Printf("failed to exec handler, error: %v", p)
 		case <-finish:
 			log.Printf("finished task in duration: %s", d)
 		case <-durationCtx.Done():
-			c.SetStatus(http.StatusInternalServerError).Json("timeout")
-			c.SetHasTimeout()
+			c.ISetStatus(http.StatusInternalServerError).IJson("timeout")
 			cancel()
 		}
-		return nil
 	}
 }

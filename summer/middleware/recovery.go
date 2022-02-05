@@ -3,13 +3,13 @@ package middleware
 import (
 	"net/http"
 
-	"go-web-framework/summer"
+	"github.com/jihonghe/go-web-framework/summer/gin"
 )
 
-func Recovery(ctx *summer.Context) error {
+func Recovery(ctx *gin.Context) error {
 	defer func() {
 		if err := recover(); err != nil {
-			ctx.SetStatus(http.StatusInternalServerError).Json(err)
+			ctx.ISetStatus(http.StatusInternalServerError).IJson(err)
 		}
 	}()
 

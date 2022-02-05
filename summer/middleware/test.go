@@ -3,14 +3,13 @@ package middleware
 import (
 	"log"
 
-	"go-web-framework/summer"
+	"github.com/jihonghe/go-web-framework/summer/gin"
 )
 
-func TestMiddleware() summer.ControllerHandler {
-	return func(c *summer.Context) error {
+func TestMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
 		log.Println("middleware before TestMiddleware()")
 		c.Next()
 		log.Println("middleware after TestMiddleware()")
-		return nil
 	}
 }
