@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/jihonghe/go-web-framework/provider/demo"
 	"github.com/jihonghe/go-web-framework/summer/gin"
 )
 
@@ -18,6 +19,9 @@ func UserLoginController(c *gin.Context) {
 type SubjectController struct{}
 
 func (s SubjectController) List(c *gin.Context) {
+	demoService := c.MustMake(demo.Key).(demo.Service)
+	foo := demoService.GetFoo()
+	c.ISetStatusOk().IJson(foo)
 }
 
 func (s SubjectController) GetName(c *gin.Context) {

@@ -8,11 +8,14 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/jihonghe/go-web-framework/provider/demo"
 	"github.com/jihonghe/go-web-framework/summer/gin"
 )
 
 func main() {
 	engine := gin.New()
+	// 绑定demo.DemoServiceProvider服务
+	engine.BindSrvProvider(&demo.DemoServiceProvider{})
 	registerRouter(engine)
 	server := &http.Server{
 		Handler: engine,

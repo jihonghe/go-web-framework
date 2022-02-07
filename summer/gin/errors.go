@@ -16,7 +16,7 @@ import (
 type ErrorType uint64
 
 const (
-	// ErrorTypeBind is used when Context.Bind() fails.
+	// ErrorTypeBind is used when Context.BindSrvProvider() fails.
 	ErrorTypeBind ErrorType = 1 << 63
 	// ErrorTypeRender is used when Context.Render() fails.
 	ErrorTypeRender ErrorType = 1 << 62

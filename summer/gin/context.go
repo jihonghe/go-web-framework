@@ -22,6 +22,7 @@ import (
 
 	"github.com/gin-contrib/sse"
 
+	"github.com/jihonghe/go-web-framework/summer"
 	"github.com/jihonghe/go-web-framework/summer/gin/binding"
 	"github.com/jihonghe/go-web-framework/summer/gin/render"
 )
@@ -46,6 +47,7 @@ const abortIndex int8 = math.MaxInt8 / 2
 // Context is the most important part of gin. It allows us to pass variables between middleware,
 // manage the flow, validate the JSON of a request and render a JSON response for example.
 type Context struct {
+	container summer.Container
 	writermem responseWriter
 	Request   *http.Request
 	Writer    ResponseWriter
@@ -661,7 +663,7 @@ func (c *Context) MustBindWith(obj interface{}, b binding.Binding) error {
 // otherwise --> returns an error
 // It parses the request's body as JSON if Content-Type == "application/json" using JSON or XML as a JSON input.
 // It decodes the json payload into the struct specified as a pointer.
-// Like c.Bind() but this method does not set the response status code to 400 and abort if the json is not valid.
+// Like c.BindSrvProvider() but this method does not set the response status code to 400 and abort if the json is not valid.
 func (c *Context) ShouldBind(obj interface{}) error {
 	b := binding.Default(c.Request.Method, c.ContentType())
 	return c.ShouldBindWith(obj, b)

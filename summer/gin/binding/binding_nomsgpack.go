@@ -30,14 +30,14 @@ type Binding interface {
 	Bind(*http.Request, interface{}) error
 }
 
-// BindingBody adds BindBody method to Binding. BindBody is similar with Bind,
+// BindingBody adds BindBody method to Binding. BindBody is similar with BindSrvProvider,
 // but it reads the body from supplied bytes instead of req.Body.
 type BindingBody interface {
 	Binding
 	BindBody([]byte, interface{}) error
 }
 
-// BindingUri adds BindUri method to Binding. BindUri is similar with Bind,
+// BindingUri adds BindUri method to Binding. BindUri is similar with BindSrvProvider,
 // but it read the Params.
 type BindingUri interface {
 	Name() string

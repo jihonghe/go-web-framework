@@ -15,6 +15,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/jihonghe/go-web-framework/summer"
 	"github.com/jihonghe/go-web-framework/summer/gin/internal/bytesconv"
 	"github.com/jihonghe/go-web-framework/summer/gin/render"
 )
@@ -68,6 +69,7 @@ const (
 // Engine is the framework's instance, it contains the muxer, middleware and configuration settings.
 // Create an instance of Engine, by using New() or Default()
 type Engine struct {
+	container summer.Container
 	RouterGroup
 
 	// Enables automatic redirection if the current route can't be matched but a
@@ -151,6 +153,26 @@ type Engine struct {
 
 var _ IRouter = &Engine{}
 
+func (engine *Engine) BindSrvProvider(provider summer.ServiceProvider) error {
+	return engine.container.BindSrvProvider(provider)
+}
+
+func (engine *Engine) IsBindSrvProvider(key string) bool {
+	return engine.container.IsBindSrvProvider(key)
+}
+
+func (engine *Engine) Make(key string) (interface{}, error) {
+	return engine.container.Make(key)
+}
+
+func (engine *Engine) MustMake(key string) interface{} {
+	return engine.container.MustMake(key)
+}
+
+func (engine *Engine) MakeNew(key string, params ...interface{}) (interface{}, error) {
+	return engine.container.MakeNew(key, params)
+}
+
 // New returns a new blank Engine instance without any middleware attached.
 // By default the configuration is:
 // - RedirectTrailingSlash:  true
@@ -162,6 +184,7 @@ var _ IRouter = &Engine{}
 func New() *Engine {
 	debugPrintWARNINGNew()
 	engine := &Engine{
+		container: summer.NewSummerContainer(),
 		RouterGroup: RouterGroup{
 			Handlers: nil,
 			basePath: "/",
@@ -202,7 +225,7 @@ func Default() *Engine {
 func (engine *Engine) allocateContext() *Context {
 	v := make(Params, 0, engine.maxParams)
 	skippedNodes := make([]skippedNode, 0, engine.maxSections)
-	return &Context{engine: engine, params: &v, skippedNodes: &skippedNodes}
+	return &Context{container: engine.container, engine: engine, params: &v, skippedNodes: &skippedNodes}
 }
 
 // Delims sets template left and right delims and returns a Engine instance.

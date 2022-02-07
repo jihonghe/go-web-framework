@@ -21,8 +21,8 @@ const BindKey = "_jihonghe/go-web-framework/summer/gin/bindkey"
 func Bind(val interface{}) HandlerFunc {
 	value := reflect.ValueOf(val)
 	if value.Kind() == reflect.Ptr {
-		panic(`Bind struct can not be a pointer. Example:
-	Use: gin.Bind(Struct{}) instead of gin.Bind(&Struct{})
+		panic(`BindSrvProvider struct can not be a pointer. Example:
+	Use: gin.BindSrvProvider(Struct{}) instead of gin.BindSrvProvider(&Struct{})
 `)
 	}
 	typ := value.Type()
